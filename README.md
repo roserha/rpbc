@@ -1,6 +1,8 @@
 # RPBC - NDS Program
 This is the pairing program that actually generates the tones based on the input on the DS. Technically could run on other DS models, so long as they support nds ROMs.
 
+![RPBC NDS Screen](res/rpbcnds.gif)
+
 ## Dependencies
 This was made using ```libnds```, ```devkitARM```, ```devkitPRO```, ```nds-dev``` and ```grit```. Most (if not all of these) are all able to be installed folowing the [devkitPRO getting started tutorial](https://devkitpro.org/wiki/Getting_Started).
 
