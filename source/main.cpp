@@ -6,14 +6,14 @@
 // this has the same name as the image
 #include "flowers.h"
 
-u16 freqs[] = {220, 235, 250, 265, 280, 295, 310, 325, 340, 355, 370, 385, 400, 415};
+u16 freqs[] = {240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500};
 int wave = 0;
 int touchWaveL = 0, touchWaveR = 0;
 
 int main(void)
 {
 	touchPosition touchXY;
-	
+
     // set the mode for 2 text layers and two extended background layers
 	videoSetMode(MODE_5_2D);
     vramSetBankA(VRAM_A_MAIN_BG_0x06000000);
@@ -23,12 +23,14 @@ int main(void)
 
 	iprintf("\x1b[35;1mRPBC-Rose'sPitch-BasedController");
 	iprintf("  \x1b[35mgithub.com/rosieparfait/rpbc\x1b[39m\n");
-	iprintf("       \x1b[32;1mCC BY-NC-SA 4.0 :)\x1b[39;49m\n");
+	
 
 	int bg3 = bgInit(3, BgType_Bmp8, BgSize_B8_256x256, 0,0);
 
 	dmaCopy(flowersBitmap, bgGetGfxPtr(bg3), 256*256);
 	dmaCopy(flowersPal, BG_PALETTE, 256*2);
+
+	iprintf("\x1b[23;0Hv0.1.1\x1b[39;49m");
 
 	while(1) {
 	
@@ -60,8 +62,8 @@ int main(void)
 			} 
 			// if touching screen
 			else if (i == 12 && state) {
-				u16 x_freq = 500 + 2*touchXY.px;
-				u16 y_freq = 500 + 2*touchXY.py;
+				u16 x_freq = 550 + 3*touchXY.px;
+				u16 y_freq = 550 + 3*touchXY.py;
 
 				if (touchWaveL != 0) {
 					soundSetFreq(touchWaveL, x_freq << 3);
