@@ -1,6 +1,8 @@
 # Rose's Pitch-Based Controller
  This Rust CLI program takes stereo input (originating from a pairing homebrew program available in the *nds branch*) and translates it to key presses and mouse movement/clicks according to the DS input.
 
+ ![RPBC in action!](res/rpbc.gif)
+
  ## Flags
  - ```-a```: Ommits list of input devices
 -  ```-c```: Opens program in calibration mode.
