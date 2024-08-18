@@ -40,6 +40,7 @@ enum FlagValues {
     HideInputDevices = 2,
     SeeButtonFrequency = 4,
     SkipPitch = 8,
+    DisableControl = 16,
 }
 
 // Core part of program, where funky things are done with the "raw" pitch itself
@@ -55,19 +56,23 @@ fn pitch_functionality(l_pitch:&f64, r_pitch:&f64, flags:&u128) {
             terminal.write(b"No buttons.. [ ]\nNo touch screen either...").unwrap();
             GLOBAL_BOOL_A = false;
             if GLOBAL_INT_A == 200 {
-                let event = EventType::ButtonRelease(Button::Left);
-                simulate(&event).unwrap();
+                if (flags & FlagValues::DisableControl as u128 == 0) {
+                    let event = EventType::ButtonRelease(Button::Left);
+                    simulate(&event).unwrap();
+                }
                 GLOBAL_INT_A = 0;
             } else if GLOBAL_INT_A > 0 {
-                let event = EventType::KeyRelease(*(KEYS.get(GLOBAL_INT_A - 1).unwrap()));
-                simulate(&event).unwrap();
+                if (flags & FlagValues::DisableControl as u128 == 0) {
+                    let event = EventType::KeyRelease(*(KEYS.get(GLOBAL_INT_A - 1).unwrap()));
+                    simulate(&event).unwrap();
+                }
                 GLOBAL_INT_A = 0;
                 GLOBAL_INCREMENT_A = 0;
             }
         } 
 
         // Pressing buttons
-        else if avg_pitch < 450.0 { 
+        else if avg_pitch < 525.0 { 
             let mut difference_in_pitch:f64 = f64::INFINITY;
             let mut i = 0;
             for j in 0..13 {
@@ -90,11 +95,13 @@ fn pitch_functionality(l_pitch:&f64, r_pitch:&f64, flags:&u128) {
             }
             terminal.write(b"\nNo touch screen though...").unwrap();
 
-            let event = EventType::KeyPress(*(KEYS.get(i).unwrap()));
             if !GLOBAL_BOOL_A {
                 if GLOBAL_INCREMENT_A > 2 {
                     GLOBAL_INT_A = i + 1;
-                    simulate(&event);
+                    if (flags & FlagValues::DisableControl as u128 == 0) {
+                        let event = EventType::KeyPress(*(KEYS.get(i).unwrap()));
+                        simulate(&event);
+                    }
                     GLOBAL_BOOL_A = true;
                 } else {GLOBAL_INCREMENT_A += 1;}
             }
@@ -120,12 +127,16 @@ fn pitch_functionality(l_pitch:&f64, r_pitch:&f64, flags:&u128) {
             let mouse_x_coord = (*MOUSECOORDS.get(0).unwrap()) as f64 + (x_coord * (MOUSECOORDS.get(2).unwrap() - MOUSECOORDS.get(0).unwrap()) as f64);
             let mouse_y_coord = (*MOUSECOORDS.get(1).unwrap()) as f64 + (y_coord * (MOUSECOORDS.get(3).unwrap() - MOUSECOORDS.get(1).unwrap()) as f64);
 
-            let event = EventType::MouseMove { x: mouse_x_coord, y: mouse_y_coord };
-            simulate(&event).unwrap();
+            if (flags & FlagValues::DisableControl as u128 == 0) {
+                let event = EventType::MouseMove { x: mouse_x_coord, y: mouse_y_coord };
+                simulate(&event).unwrap();
+            }
             if !GLOBAL_BOOL_A {
                 GLOBAL_INT_A = 200;
-                let event = EventType::ButtonPress(Button::Left);
-                simulate(&event).unwrap();
+                if (flags & FlagValues::DisableControl as u128 == 0) {
+                    let event = EventType::ButtonPress(Button::Left);
+                    simulate(&event).unwrap();
+                }
                 GLOBAL_BOOL_A = true;
             }
         }
@@ -246,7 +257,7 @@ fn calibration_pitch_functionality(l_pitch:&f64, r_pitch:&f64, flags:&u128) {
                     json_mouse["right"] = (*MOUSECOORDS.get(2).unwrap()).into();
                     json_mouse["bottom"] = (*MOUSECOORDS.get(3).unwrap()).into();
                     let mut mouse_file = File::create("coords.json").unwrap();
-                    mouse_file.write_all(json_mouse.pretty(4).as_bytes());
+                    mouse_file.write_all(json_mouse.pretty(4).as_bytes()).unwrap();
                     CONTINUE_TO_RUN_PROGRAM = false;
                 }
             } else {
@@ -277,6 +288,7 @@ fn main() {
     if args.contains(&String::from("-a")) { flags |= FlagValues::HideInputDevices as u128 }
     if args.contains(&String::from("-hz")) { flags |= FlagValues::SeeButtonFrequency as u128 }
     if args.contains(&String::from("-sp")) { flags |= FlagValues::SkipPitch as u128 }
+    if args.contains(&String::from("-x")) { flags |= FlagValues::DisableControl as u128 }
 
     // Create microphone
     let chosen_mic_id = 0; // <- change this to choose another mic if needed
